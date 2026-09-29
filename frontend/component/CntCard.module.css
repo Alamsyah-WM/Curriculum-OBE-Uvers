@@ -1,0 +1,85 @@
+/* CntCard.module.css */
+
+/* Buat nav-wrap dan nav-list mengisi penuh lebar card */
+.fullWidthCard :global(.ant-card-head-tabs .ant-tabs-nav) {
+    width: 100%;
+}
+
+.fullWidthCard :global(.ant-card-head-tabs .ant-tabs-nav-wrap) {
+    width: 100%;
+}
+
+.fullWidthCard :global(.ant-card-head-tabs .ant-tabs-nav-list) {
+    display: flex;
+    width: 100%;
+}
+
+/* Setiap tab item mengisi ruang secara merata */
+.fullWidthCard :global(.ant-card-head-tabs .ant-tabs-tab) {
+    flex: 1;
+    justify-content: center;
+    margin: 0 !important;
+    text-align: center;
+}
+
+.noTabCard :global(.ant-card-head) {
+  min-height: 38px;
+  padding: 0 16px;
+}
+
+.noTabCard :global(.ant-card-head-title) {
+  padding: 16px 0;
+}
+
+/* Tabs navbar di halaman mahasiswa: full width dan rata tengah */
+.studentFullWidthTabs :global(.ant-tabs-nav) {
+  width: 100%;
+}
+
+.studentFullWidthTabs :global(.ant-tabs-nav-wrap) {
+  width: 100%;
+}
+
+.studentFullWidthTabs :global(.ant-tabs-nav-list) {
+  display: flex;
+  width: 100%;
+}
+
+.studentFullWidthTabs :global(.ant-tabs-tab) {
+  flex: 1;
+  justify-content: center;
+  margin: 0 !important;
+  text-align: center;
+}
+
+/* Warna teks tab: putih untuk semua state */
+.studentFullWidthTabs :global(.ant-tabs-tab .ant-tabs-tab-btn) {
+  color: #ffffff !important;
+}
+
+/* Tab aktif: background berbeda, teks tetap putih dan lebih tebal */
+.studentFullWidthTabs
+  :global(.ant-tabs-tab.ant-tabs-tab-active) {
+  background-color: #01508f; /* biru sedikit lebih muda, bisa kamu ganti */
+}
+
+.studentFullWidthTabs
+  :global(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+/* Opsional: warna garis bawah indikator active tab */
+.studentFullWidthTabs :global(.ant-tabs-ink-bar) {
+  background-color: #59d4a2; /* atau transparent kalau tidak mau garis */
+}
+
+
+/* Active tab text & underline (ink bar) styling for prodi/curriculum cards */
+.fullWidthCard :global(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+    color: #003D73 !important;
+}
+
+.fullWidthCard :global(.ant-tabs-ink-bar) {
+    background-color: #003D73 !important;
+}

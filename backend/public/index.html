@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBE - UVERS</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 20px;">
+        <div>
+            <h1>OBE</h1>
+            <p>Sistem Pengelolaan Data OBE</p>
+        </div>
+        <div id="user-info" style="font-size: 14px; text-align: right;">
+            <!-- Info user akan dimuat lewat main.js -->
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" onclick="showTab('periode')">Periode</div>
+        <div class="tab" onclick="showTab('prodi')">Prodi</div>
+        <div class="tab" onclick="showTab('profile')">Profile Lulusan</div>
+        <div class="tab" onclick="showTab('cpl')">CPL</div>
+        <div class="tab" onclick="showTab('mk')">Mata Kuliah</div>
+        <div class="tab" onclick="showTab('cpmk')">CPMK</div>
+        <div class="tab" onclick="showTab('subcpmk')">SubCPMK</div>
+        <div class="tab" onclick="showTab('asesmen')">Asesmen</div> <!-- TAB BARU -->
+        <div class="tab" onclick="showTab('mahasiswa')">Mahasiswa</div>
+        <div class="tab" onclick="showTab('krs')">KRS</div> <!-- TAB KRS -->
+        <div class="tab" onclick="showTab('nilai')">Input Nilai</div> <!-- TAB BARU -->
+        <div class="tab" onclick="showTab('cpl-achievement')">Ketercapaian CPL</div>
+        <div class="tab" onclick="showTab('cpl-prodi-achv')">Rata-Rata CPL Prodi</div>
+        <div class="tab" onclick="showTab('dosen')">Dosen</div>
+    </div>
+
+    <!-- PERIODE KURIKULUM -->
+    <div id="periode-section" class="form-section active">
+        <div class="form-row">
+            <input id="tahun-mulai" placeholder="Tahun Mulai (e.g., 2024)">
+        </div>
+        <div class="form-row">
+            <input id="tahun-selesai" class="full-width" placeholder="Tahun Selesai (e.g., 2028)">
+        </div>
+        <button onclick="savePeriode()">Tambah Periode</button>
+        <div id="periode-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-periode" oninput="loadPeriode()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="periode-list" class="table-container"></div>
+    </div>
+
+    <!-- PRODI -->
+    <div id="prodi-section" class="form-section">
+        <div class="form-row">
+            <input id="kode-prodi" placeholder="Kode Prodi (e.g., TI)">
+        </div>
+        <div class="form-row">
+            <input id="nama-prodi" class="full-width" placeholder="Nama Prodi (e.g., Teknik Informatika)">
+        </div>
+        <button onclick="saveProdi()">Tambah Prodi</button>
+        <div id="prodi-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-prodi" oninput="loadProdi()" placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="prodi-list" class="table-container"></div>
+    </div>
+
+    <!-- PROFILE LULUSAN -->
+    <div id="profile-section" class="form-section">
+        <div class="form-row">
+            <select id="periode-select" class="half-width">
+                <option value="">Pilih Periode</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <select id="prodi-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <input id="kode-pl" placeholder="Kode PL (e.g., PL-TI-001)">
+        </div>
+        <div class="form-row">
+            <input id="profesi" placeholder="Profesi (e.g., Software Engineer)">
+            <input id="referensi" placeholder="Referensi">
+        </div>
+        <button onclick="saveProfile()">Tambah Profile Lulusan</button>
+        <div id="profile-status" class="status"></div>
+        <div class="search-container"
+            style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-periode-profile" class="filter-profile" name="periode_id" onchange="loadProfile()"
+                style="width: auto; min-width: 200px; max-width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Periode</option>
+            </select>
+            <input type="text" id="search-profile" class="filter-profile" name="search" oninput="loadProfile()"
+                placeholder="Ketik text untuk mencari data..."
+                style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="profile-list" class="table-container"></div>
+    </div>
+
+    <!-- CPL -->
+    <div id="cpl-section" class="form-section">
+        <div class="form-row">
+            <input id="kode-cpl" class="third-width" placeholder="Kode CPL (e.g., CPL-TI-001)">
+            <select id="pl-select" class="third-width">
+                <option value="">Pilih Profile Lulusan 1</option>
+            </select>
+            <select id="pl-select-2" class="third-width">
+                <option value="">Pilih Profile Lulusan 2 (Opsional)</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="deskripsi-cpl" class="full-width" placeholder="Deskripsi CPL">
+        </div>
+        <div class="form-row">
+            <input id="referensi-cpl" class="full-width" placeholder="Referensi">
+        </div>
+        <button onclick="saveCpl()">Tambah CPL</button>
+        <div id="cpl-status" class="status"></div>
+        <div class="search-container"
+            style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-prodi-cpl" class="filter-cpl" name="prodi_id" onchange="loadCpl()"
+                style="width: auto; min-width: 200px; max-width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Prodi</option>
+            </select>
+            <input type="text" id="search-cpl" class="filter-cpl" name="search" oninput="loadCpl()"
+                placeholder="Ketik text untuk mencari data..."
+                style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="cpl-list" class="table-container"></div>
+    </div>
+
+    <!-- MATA KULIAH -->
+    <div id="mk-section" class="form-section">
+
+        <div class="form-row">
+            <select id="prodi-mk-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="dosen-mk-select" class="half-width" style="display: none;">
+                <option value="">Pilih Dosen</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="kode-mk" placeholder="Kode MK (e.g., TIF101)">
+            <select id="semester-select" class="half-width">
+                <option value="">Pilih Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="nama-mk-id" class="full-width" placeholder="Nama Mata Kuliah (Bahasa Indonesia)">
+        </div>
+        <div class="form-row">
+            <input id="nama-mk-en" class="full-width" placeholder="Nama Mata Kuliah (English)">
+        </div>
+
+        <!-- CHECKBOX CPL (BARU) -->
+        <div class="form-row">
+            <div class="full-width">
+                <label><strong>Pilih CPL (Capaian Pembelajaran Lulusan):</strong></label>
+                <div id="cpl-checkbox-container"
+                    style="max-height: 200px; overflow-y: auto; border: 1px solid #e1e8ed; padding: 10px; border-radius: 6px; margin-top: 8px;">
+                    <p style="color: #999;">Pilih Prodi terlebih dahulu</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="saveMk()">Tambah Mata Kuliah</button>
+        <div id="mk-status" class="status"></div>
+        <div class="search-container"
+            style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-prodi-mk" class="filter-mk" name="prodi_id" onchange="loadMk()"
+                style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Prodi</option>
+            </select>
+            <select id="filter-semester-mk" class="filter-mk" name="semester" onchange="loadMk()"
+                style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Semester</option>
+                <option value="1">Semester 1</option>
+                <option value="2">Semester 2</option>
+                <option value="3">Semester 3</option>
+                <option value="4">Semester 4</option>
+                <option value="5">Semester 5</option>
+                <option value="6">Semester 6</option>
+                <option value="7">Semester 7</option>
+                <option value="8">Semester 8</option>
+            </select>
+            <input type="text" id="search-mk" class="filter-mk" name="search" oninput="loadMk()"
+                placeholder="Ketik text untuk mencari data..."
+                style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="mk-list" class="table-container"></div>
+    </div>
+
+    <!-- CPMK -->
+    <div id="cpmk-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-cpmk-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mk-cpmk-select" class="half-width">
+                <option value="">Pilih Mata Kuliah</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <div class="full-width">
+                <select id="cpl-cpmk-select" class="full-width">
+                    <option value="">Pilih CPL (Pilih Mata Kuliah Dahulu)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-row">
+            <input id="kode-cpmk" class="full-width" placeholder="Kode CPMK (e.g., CPMK-1)">
+        </div>
+        <div class="form-row">
+            <input id="deskripsi-cpmk" class="full-width" placeholder="Deskripsi CPMK">
+        </div>
+        <button onclick="saveCpmk()">Tambah CPMK</button>
+        <div id="cpmk-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-prodi-cpmk" class="filter-cpmk" name="prodi_id" onchange="loadCpmk()" style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Prodi</option>
+            </select>
+            <input type="text" id="search-cpmk" class="filter-cpmk" name="search" oninput="loadCpmk()" placeholder="Ketik text untuk mencari data..." style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="cpmk-list" class="table-container"></div>
+    </div>
+
+    <!-- SUBCPMK -->
+    <div id="subcpmk-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-subcpmk-select" class="third-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mk-subcpmk-select" class="third-width">
+                <option value="">Pilih Mata Kuliah</option>
+            </select>
+            <select id="cpmk-subcpmk-select" class="third-width">
+                <option value="">Pilih CPMK</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="kode-subcpmk" class="full-width" placeholder="Kode SubCPMK (e.g., SubCPMK-1.1)">
+        </div>
+        <div class="form-row">
+            <input id="deskripsi-subcpmk" class="full-width" placeholder="Deskripsi SubCPMK">
+        </div>
+        <button onclick="saveSubCpmk()">Tambah SubCPMK</button>
+        <div id="subcpmk-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-subcpmk" oninput="loadSubCpmk()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="subcpmk-list" class="table-container"></div>
+    </div>
+
+    <!-- ASESMEN -->
+    <div id="asesmen-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-asesmen-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mk-asesmen-select" class="half-width">
+                <option value="">Pilih Mata Kuliah</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <select id="cpmk-asesmen-select" class="half-width">
+                <option value="">Pilih CPMK</option>
+            </select>
+            <select id="subcpmk-asesmen-select" class="half-width">
+                <option value="">Pilih SubCPMK</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="nama-asesmen" class="half-width" placeholder="Nama Asesmen (e.g., Tugas 1, UTS)">
+            <input id="bobot-asesmen" type="number" step="0.01" class="half-width"
+                placeholder="Bobot Nilai Asesmen (e.g., 5)">
+        </div>
+        <div class="form-row">
+            <select id="teknik-penilaian-asesmen" class="full-width">
+                <option value="">Pilih Teknik Penilaian</option>
+                <option value="Partisipasi (Quiz)">Partisipasi (Quiz)</option>
+                <option value="Observasi (Praktik/Tugas)">Observasi (Praktik/Tugas)</option>
+                <option value="Tes Tulisan (UTS)">Tes Tulisan (UTS)</option>
+                <option value="Tes Tulisan (UAS)">Tes Tulisan (UAS)</option>
+                <option value="Unjuk Kerja (Presentasi Proyek)">Unjuk Kerja (Presentasi Proyek)</option>
+                <option value="Analisis Partisipatif">Analisis Partisipatif</option>
+                <option value="Tes Lisan (Tugas Kelompok)">Tes Lisan (Tugas Kelompok)</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="deskripsi-asesmen" class="full-width" placeholder="Deskripsi / Keterangan Asesmen">
+        </div>
+        <button onclick="saveAsesmen()">Tambah Asesmen</button>
+        <div id="asesmen-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-asesmen" oninput="loadAsesmen()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="asesmen-list" class="table-container"></div>
+    </div>
+
+    <!-- MAHASISWA -->
+    <div id="mahasiswa-section" class="form-section">
+        <div class="form-row">
+            <input id="nama-mahasiswa" placeholder="Nama Lengkap">
+            <input id="nim-mahasiswa" placeholder="NIM (e.g., 12345678)">
+        </div>
+        <div class="form-row">
+            <input id="angkatan-mahasiswa" class="full-width" placeholder="Angkatan (e.g., 2024)">
+            <select id="prodi-mahasiswa-select" style="display: none;">
+                <option value="">Pilih Prodi</option>
+            </select>
+        </div>
+        <button onclick="saveMahasiswa()">Tambah Mahasiswa</button>
+        <div id="mahasiswa-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-prodi-mahasiswa" class="filter-mahasiswa" name="prodi_id" onchange="loadMahasiswa()" style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Prodi</option>
+            </select>
+            <select id="filter-angkatan-mahasiswa" class="filter-mahasiswa" name="angkatan" onchange="loadMahasiswa()" style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Angkatan</option>
+            </select>
+            <input type="text" id="search-mahasiswa" class="filter-mahasiswa" name="search" oninput="loadMahasiswa()" placeholder="Ketik text untuk mencari data..." style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="mahasiswa-list" class="table-container"></div>
+    </div>
+
+    <!-- KRS (Kartu Rencana Studi / Pemetaan MK) -->
+    <div id="krs-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-krs-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mahasiswa-krs-select" class="half-width">
+                <option value="">Pilih Mahasiswa</option>
+            </select>
+        </div>
+
+        <div class="form-row">
+            <div class="full-width">
+                <label><strong>Pilih Mata Kuliah (KRS):</strong></label>
+                <div id="mk-krs-checkbox-container"
+                    style="max-height: 200px; overflow-y: auto; border: 1px solid #e1e8ed; padding: 10px; border-radius: 6px; margin-top: 8px;">
+                    <p style="color: #999;">Pilih Mahasiswa terlebih dahulu</p>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="saveKrs()">Simpan KRS</button>
+        <div id="krs-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+            <select id="filter-prodi-krs" class="filter-krs" name="prodi_id" onchange="renderKrsTable()" style="width: auto; min-width: 150px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background: white; margin: 0;">
+                <option value="">Semua Prodi</option>
+            </select>
+            <input type="text" id="search-krs" class="filter-krs" name="search" oninput="renderKrsTable()" placeholder="Ketik text untuk mencari data..." style="flex: 1; width: 100%; margin: 0; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="krs-list" class="table-container"></div>
+    </div>
+
+    <!-- INPUT NILAI -->
+    <div id="nilai-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-nilai-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mahasiswa-nilai-select" class="half-width">
+                <option value="">Pilih Mahasiswa</option>
+            </select>
+        </div>
+        <div id="matakuliah-cards-container" style="margin-top: 20px;">
+            <!-- Matakuliah cards will be rendered here dynamically -->
+        </div>
+
+        <div id="nilai-status" class="status"></div>
+
+        <!-- HISTORY NILAI MAHASISWA -->
+        <h3 style="margin-top: 20px; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Rekap Nilai Mahasiswa</h3>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-nilai" oninput="renderNilaiTable()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="nilai-list" class="table-container"></div>
+    </div>
+
+    <!-- CPL ACHIEVEMENT -->
+    <div id="cpl-achievement-section" class="form-section">
+        <div class="form-row">
+            <select id="prodi-cplachv-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+            <select id="mahasiswa-cplachv-select" class="half-width">
+                <option value="">Pilih Mahasiswa</option>
+            </select>
+        </div>
+        <div id="cplachv-status" class="status"></div>
+
+        <h3 style="margin-top: 20px; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Ketercapaian CPL</h3>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-cplachv" oninput="fetchCplAchievement()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="cplachv-list" class="table-container" style="margin-top: 15px;"></div>
+    </div>
+
+    <!-- CPL PRODI ACHIEVEMENT -->
+    <div id="cpl-prodi-achv-section" class="form-section">
+        <div class="form-row">
+            <!-- Pilihan prodi diubah menjadi TABS sesuai perbincangan -->
+            <div id="prodi-cplprodiachv-tabs"
+                style="display: flex; border-bottom: 1px solid #cbd5e1; margin-bottom: 10px; width: 100%; overflow-x: auto; font-size: 14px; font-weight: 500;">
+                <!-- Tabs will be rendered here via JS -->
+            </div>
+        </div>
+        <div id="cplprodiachv-status" class="status"></div>
+
+        <h3 style="margin-top: 20px; border-bottom: 2px solid #3498db; padding-bottom: 5px;">Rata-Rata Ketercapaian CPL
+            Prodi</h3>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-cplprodiachv" oninput="calculateCplProdi()"
+                placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="cplprodiachv-list" class="table-container" style="margin-top: 15px;"></div>
+    </div>
+
+    <!-- DOSEN -->
+    <div id="dosen-section" class="form-section">
+        <div class="form-row">
+            <input id="nama-dosen" placeholder="Nama Dosen">
+            <input id="nidn-dosen" placeholder="NIDN">
+        </div>
+        <div class="form-row" style="display: none;">
+            <select id="prodi-dosen-select" class="half-width">
+                <option value="">Pilih Prodi</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <input id="email-dosen" type="email" placeholder="Email Dosen untuk Login">
+            <input id="password-dosen" type="password" placeholder="Password Login Dosen">
+        </div>
+        <div class="form-row">
+            <select id="periode-dosen-select" class="half-width" onchange="updateAngkatanDosen()">
+                <option value="">Pilihan Opsional: Pilih Periode Wali</option>
+            </select>
+            <select id="angkatan-dosen-select" class="half-width" disabled>
+                <option value="">Pilih Angkatan Wali</option>
+            </select>
+        </div>
+        <div class="form-row">
+            <div class="full-width">
+                <label style="margin-bottom: 8px; display: block; font-weight: 500;">Pilih Level/Role (Bisa lebih dari 1):</label>
+                <div id="role-dosen-container" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <label><input type="checkbox" class="role-checkbox" value="Dekan"> Dekan</label>
+                    <label><input type="checkbox" class="role-checkbox" value="Kaprodi"> Kaprodi</label>
+                    <label><input type="checkbox" class="role-checkbox" value="Dosen"> Dosen</label>
+                    <label><input type="checkbox" class="role-checkbox" value="Admin"> Admin</label>
+                </div>
+            </div>
+        </div>
+        <button onclick="saveDosen()">Tambah Dosen</button>
+        <div id="dosen-status" class="status"></div>
+        <div class="search-container" style="margin-top: 15px; margin-bottom: 10px;">
+            <input type="text" id="search-dosen" oninput="loadDosen()" placeholder="Ketik text untuk mencari data..."
+                style="width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px;">
+        </div>
+        <div id="dosen-list" class="table-container"></div>
+    </div>
+
+    <div id="role-selection-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+        <div style="background: white; padding: 30px; border-radius: 8px; width: 400px; max-width: 90%; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <h2 style="margin-top: 0; text-align: center; color: #2c3e50;">Pilih Role Aktif</h2>
+            <p style="text-align: center; color: #7f8c8d; margin-bottom: 20px;">Pilih salah satu role untuk sesi ini.</p>
+            <div id="role-selection-buttons" style="display: flex; flex-direction: column; gap: 10px;">
+                <!-- Buttons will be generated via main.js -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/periode.js"></script>
+    <script src="js/prodi.js"></script>
+    <script src="js/profile.js"></script>
+    <script src="js/cpl.js"></script>
+    <script src="js/mk.js"></script>
+    <script src="js/cpmk.js"></script>
+    <script src="js/subcpmk.js"></script>
+    <script src="js/asesmen.js"></script> <!-- JS ASESMEN -->
+    <script src="js/mahasiswa.js"></script>
+    <script src="js/krs.js"></script> <!-- JS KRS -->
+    <script src="js/nilai.js"></script> <!-- JS NILAI -->
+    <script src="js/cpl_achievement.js"></script> <!-- JS CPL -->
+    <script src="js/cpl_prodi_achv.js"></script> <!-- JS CPL PRODI -->
+    <script src="js/dosen.js"></script>
+</body>
+
+</html>

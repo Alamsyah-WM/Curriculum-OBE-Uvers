@@ -1,0 +1,185 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import CardNoTab from "@/component/CardNoTab"; // 🔥 No Tab!
+import {
+  Button,
+  MenuProps,
+  Space,
+  Dropdown,
+  Tag,
+  Spin,
+  Select,
+} from "antd";
+import { DownOutlined, PlusOutlined } from "@ant-design/icons";
+import CplBarChart from "@/component/dashboard/home/CplBarChart";
+import CplDetail from "@/component/dashboard/home/CplDetail";
+import {
+  fetchCplAchievement,
+  CplAchievement,
+} from "@/service/cpl";
+import { fetchAuthMe, AuthMeResponse } from "@/service/me"; // 🔥 Prodi dari user
+
+// 🔥 FIXED: Nama fungsi benar
+export default function KaprodiHome() {
+  const [prodiId, setProdiId] = useState<string>(""); // Single prodi!
+  const [selectedPeriod, setSelectedPeriod] = useState("2025-2030");
+  const [cplData, setCplData] = useState<CplAchievement[]>([]);
+  const [selectedCpl, setSelectedCpl] = useState<CplAchievement | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const periodList: MenuProps["items"] = [
+    {
+      label: "2025-2030",
+      key: "2025-2030",
+      onClick: () => setSelectedPeriod("2025-2030"),
+    },
+    {
+      label: "2030-2035",
+      key: "2030-2035",
+      onClick: () => setSelectedPeriod("2030-2035"),
+    },
+  ];
+
+  // 🔥 Load prodi_id dari user profile (Kaprodi = 1 prodi)
+  useEffect(() => {
+    fetchAuthMe()
+      .then((user: AuthMeResponse) => {
+        setProdiId(user.prodi_id);
+      })
+      .catch((err) => {
+        console.error("Error fetch user prodi:", err);
+        setError("Gagal load prodi user");
+      });
+  }, []);
+
+  // 🔥 Fetch CPL hanya 1 prodi (no tab change!)
+  useEffect(() => {
+    if (!prodiId) return;
+
+    setLoading(true);
+    setError(null);
+    setSelectedCpl(null);
+
+    fetchCplAchievement(prodiId)
+      .then((data) => {
+        const sortedData = [...data].sort((a, b) =>
+          a.kode_cpl.localeCompare(b.kode_cpl, undefined, { numeric: true })
+        );
+        setCplData(sortedData);
+      })
+      .catch((err) => {
+        console.error("Error fetch CPL:", err);
+        setCplData([]);
+        setError("Gagal mengambil data CPL");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [prodiId]); // 🔥 Dependency prodiId only!
+
+  const handleSelectCplFromDropdown = (cplId: string) => {
+    const found = cplData.find((c) => c.cpl_id === cplId);
+    if (found) {
+      setSelectedCpl(found);
+    }
+  };
+
+  const truncate = (text: string, max: number) =>
+    text.length > max ? text.slice(0, max) + "..." : text;
+
+  return (
+    <div
+      className="w-full"
+      style={{
+        maxWidth: "100%",
+        overflowX: "hidden",
+      }}
+    >
+      <CardNoTab
+        headerContent={
+          <div>
+            <div className="flex flex-row gap-2 pb-2">
+              <div className="gap-2 flex w-full">
+                <Dropdown menu={{ items: periodList }} trigger={["click"]}>
+                  <Button>
+                    <Space>
+                      {selectedPeriod}
+                      <DownOutlined />
+                    </Space>
+                  </Button>
+                </Dropdown>
+                <Button icon={<PlusOutlined />} iconPlacement="end">
+                  Filter
+                </Button>
+              </div>
+
+              <div className="gap-2 flex justify-end">
+                {/* <Button
+                  style={{ backgroundColor: "#59D4A2", color: "white" }}
+                  icon={<PlusOutlined />}
+                  iconPlacement="start"
+                >
+                  Upload Excl
+                </Button> */}
+              </div>
+            </div>
+
+            <div className="flex flex-row">
+              <Tag closeIcon style={{ backgroundColor: "#E8DEF8" }}>
+                2025
+              </Tag>
+            </div>
+          </div>
+        }
+      >
+        {loading ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "48px 0",
+            }}
+          >
+            <Spin size="large" />
+          </div>
+        ) : error ? (
+          <div style={{ padding: 24, color: "red", textAlign: "center" }}>
+            {error}
+          </div>
+        ) : cplData.length === 0 ? (
+          <div style={{ padding: 24, opacity: 0.5, textAlign: "center" }}>
+            Tidak ada data CPL untuk prodi ini.
+          </div>
+        ) : (
+          <>
+            <div style={{ margin: "8px 0 16px 0" }}>
+              <Select
+                style={{ minWidth: 260, maxWidth: 480 }}
+                placeholder="Pilih CPL untuk lihat detail"
+                value={selectedCpl?.cpl_id}
+                onChange={handleSelectCplFromDropdown}
+                options={cplData.map((cpl) => ({
+                  label: `${cpl.kode_cpl} - ${truncate(cpl.deskripsi, 60)}`,
+                  value: cpl.cpl_id,
+                }))}
+                allowClear
+                onClear={() => setSelectedCpl(null)}
+              />
+            </div>
+
+            <CplBarChart
+              data={cplData}
+              onSelectCpl={(cpl) => {
+                setSelectedCpl(cpl);
+              }}
+            />
+
+            {selectedCpl && <CplDetail cpl={selectedCpl} />}
+          </>
+        )}
+      </CardNoTab>
+    </div>
+  );
+}

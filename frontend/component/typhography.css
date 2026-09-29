@@ -1,0 +1,27 @@
+.roboto-mono {
+    font-family: "Roboto Mono", monospace;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 700;
+}
+
+.title-large {
+  font-family: "Roboto Flex", system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 400; /* Regular */
+}
+
+.title-small {
+  font-family: "Roboto Flex", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400; /* Regular */
+}
+
+.body-small {
+    font-family: "Roboto Flex", system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 400; /* Regular */
+}
